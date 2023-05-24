@@ -1,4 +1,5 @@
 #include "freeglut.h"
+#include <math.h>
 
 
  struct Esfera {
@@ -10,6 +11,80 @@
 	unsigned char verde= 255;
 	unsigned char azul= 255;
 };
+
+ struct Plano {
+	 unsigned char V1_rojo;
+	 unsigned char V1_verde;
+	 unsigned char V1_azul;
+
+	 unsigned char V2_rojo;
+	 unsigned char V2_verde;
+	 unsigned char V2_azul;
+
+	 unsigned char V3_rojo;
+	 unsigned char V3_verde;
+	 unsigned char V3_azul;
+
+	 unsigned char V4_rojo;
+	 unsigned char V4_verde;
+	 unsigned char V4_azul;
+
+	 float v1_x, v1_y, v1_z;
+	 float v2_x, v2_y, v2_z;
+	 float v3_x, v3_y, v3_z;
+	 float v4_x, v4_y, v4_z; 
+ };
+
+ struct Mundo {
+
+	 //gluLookAt(0, 10, 30,  // posicion del ojo
+		// 0.0, 0, 0.0,      // hacia que punto mira  (0,0,0) 
+		// 0.0, 1.0, 0.0);      // definimos hacia arriba (eje Y)  
+
+	 float ojo_x, ojo_y, ojo_z;
+	 float pto_vista_x, pto_vista_y, pto_vista_z;
+	 float eje_x, eje_y, eje_z;
+	 
+
+ };
+
+ struct Torus
+ {
+	 float innerRadius, outerRadius,sides,rings;
+
+
+ };
+
+ void Mueve(Mundo* m)
+ {
+	 float dist = sqrt(m->ojo_x* m->ojo_x + m->ojo_z* m->ojo_z);
+	 float theta = atan2(m->ojo_z, m->ojo_x);
+	 theta += 0.01f;
+	 m->ojo_x = dist * cos(theta);
+	 m->ojo_z = dist * sin(theta);
+
+  }
+
+ void Dibuja(const Torus& torus)
+ {
+	 glutWireTorus(torus.innerRadius, torus.outerRadius, torus.sides , torus.rings );
+ }
+
+ void Dibuja(const Plano& plano)
+ {
+	 glDisable(GL_LIGHTING);
+	 glBegin(GL_POLYGON);
+	 glColor3ub(plano.V1_rojo, plano.V1_verde, plano.V1_azul);
+	 glVertex3f(plano.v1_x, plano.v1_y, plano.v1_z);
+	 glColor3ub(plano.V2_rojo, plano.V2_verde, plano.V2_azul);
+	 glVertex3f(plano.v2_x, plano.v2_y, plano.v2_z);
+	 glColor3ub(plano.V3_rojo, plano.V3_verde, plano.V3_azul);
+	 glVertex3f(plano.v3_x, plano.v3_y, plano.v3_z);
+	 glColor3ub(plano.V4_rojo, plano.V4_verde, plano.V4_azul);
+	 glVertex3f(plano.v4_x, plano.v4_y, plano.v4_z);
+	 glEnd();
+	 glEnable(GL_LIGHTING);
+ }
 
  void Dibuja(const Esfera& e)
  {
@@ -30,14 +105,39 @@
 	
  }
 
- float var_x = 0.0f,var_y;
 
  
 
+ //float radio = 2.0f;
+ //float x = 0.0f;
+ //float y = 0.0f;
+ //float z = 0.0f;
+ //unsigned char rojo = 255;
+ //unsigned char verde = 255;
+ //unsigned char azul = 255;
 
 
- Esfera esfera = { 2.0f,0.0f,0.0f,0.0f,255,255,255 };
+
+	 //gluLookAt(0, 10, 30,  // posicion del ojo
+		// 0.0, 0, 0.0,      // hacia que punto mira  (0,0,0) 
+		// 0.0, 1.0, 0.0);      // definimos hacia arriba (eje Y)  
+
+ Mundo mundo = { 0.0f,10.0f,30.0f, 0.0f,0.0f,0.0f, 0.0f, 1.0f,0.0f };
+ Esfera esfera = { 2.0f,3.0f,0.0f,0.0f,255,0,255 };
  Esfera esfera2 = { 2.0f,0.0f,0.0f,0.0f,255,255,255 };
+ Plano plano = { 255,0,0, 255,255,0, 255,255,255, 0,255,255, 5.0f,0.0f,5.0f, -5.0f,0.0f,5.0f, -5.0f,0.0f,-5.0f, 5.0f,0.0f,-5.0f };
+ Torus torus = { 2.5f,5.0f,10.0f,10.0f };
+
+	 //glBegin(GL_POLYGON);
+	 //glColor3ub(255, 0, 0);
+	 //glVertex3f(-5.0f, -5.0f, 0.0f);
+	 //glColor3ub(255, 255, 0);
+	 //glVertex3f(-5.0f, 5.0f, 0.0f);
+	 //glColor3ub(255, 255, 255);
+	 //glVertex3f(5.0f, 5.0f, 0.0f);
+	 //glColor3ub(0, 255, 255);
+	 //glVertex3f(5.0f, -5.0f, 0.0f);
+	 //glEnd();
 
 //los callback, funciones que seran llamadas automaticamente por la glut
 //cuando sucedan eventos
@@ -82,23 +182,21 @@ void OnDraw(void)
 	glMatrixMode(GL_MODELVIEW);	
 	glLoadIdentity();
 	
-	gluLookAt(var_x, 10, 20,  // posicion del ojo
-		0.0, 0, 0.0,      // hacia que punto mira  (0,0,0) 
-		0.0, 1.0, 0.0);      // definimos hacia arriba (eje Y)    
+	gluLookAt(mundo.ojo_x, mundo.ojo_y, mundo.ojo_z,  // posicion del ojo
+		mundo.pto_vista_x, mundo.pto_vista_y, mundo.pto_vista_z,      // hacia que punto mira  (0,0,0) 
+		mundo.eje_x, mundo.eje_y, mundo.eje_z);      // definimos hacia arriba (eje Y)    
 
 	//aqui es donde hay que poner el código de dibujo
+	//Dibuja(esfera);
 	Dibuja(esfera);
-	Dibuja(esfera2);
-	glBegin(GL_POLYGON);
-	glColor3ub(255, 0, 0);
-	glVertex3f(-5.0f, -5.0f, 0.0f);
-	glColor3ub(255, 255, 0);
-	glVertex3f(-5.0f, 5.0f, 0.0f);
-	glColor3ub(255, 255, 255);
-	glVertex3f(5.0f, 5.0f, 0.0f);
+
+	Dibuja(plano);
+
+	glColor3ub(0, 255, 0);
+	Dibuja(torus);
+
 	glColor3ub(0, 255, 255);
-	glVertex3f(5.0f, -5.0f, 0.0f);
-	glEnd();
+	Dibuja(esfera2);
 
 	/*glTranslatef(-x_esfera, 0, 0);*/
 
@@ -107,37 +205,47 @@ void OnDraw(void)
 }
 void OnKeyboardDown(unsigned char key, int x_t, int y_t)
 {
-	if (key == '1' && esfera.radio< 3) { esfera.radio+= 0.1f; }
-	if (key == '2' && esfera.radio> 1) { esfera.radio-= 0.1f; }
-	if (key == 'r')
+
+	switch (key)
 	{
-		esfera.rojo= 255;
-		esfera.verde= 0;
-		esfera.azul= 0;
+	case 'w':
+	case 'W':
+		esfera2.y += 1.0f;
+		break;
+	case 'S':
+	case 's':
+		esfera2.y -= 1.0f;
+		break;
+	case 'A':
+	case 'a':
+		esfera2.x -= 1.0f;
+		break;
+	case 'D':
+	case 'd':
+		esfera2.x += 1.0f;
+		break;
+	case 'r':
+	case 'R':
+		esfera2.rojo = 255;
+		esfera2.verde = 0;
+		esfera2.azul = 0;
+
+		break;
+	case 'g':
+	case 'G':
+		esfera2.rojo = 0;
+		esfera2.verde = 255;
+		esfera2.azul = 0;
+		break;
+	default:
+
+		break;
 	}
-	if (key == 'g')
-	{
-		esfera.rojo= 0;
-		esfera.verde= 255;
-		esfera.azul= 0;
-	}
-	if (key == 'b')
-	{
-		esfera.rojo= 0;
-		esfera.verde= 0;
-		esfera.azul= 255;
-	}
-	if (key == 'a')//izq, X negativo
-		esfera.x-= 0.1f;
-	if (key == 'd')//izq, X negativo
-		esfera.x+= 0.1f;
-	if (key == 'w')//izq, X negativo
-		esfera.y+= 0.1f;
-	if (key == 's')//izq, X negativo
-		esfera.y-= 0.1f;
-	if (key == 'j')//izq, X negativo
-		var_x += 0.1f;
-	var_y += 0.1f;
+
+	
+
+
+
 	glutPostRedisplay();
 
 }
@@ -146,9 +254,8 @@ void OnTimer(int value)
 {
 
 	Mueve(&esfera);
-	Mueve(&esfera2);
-	var_x += 0.1f;
-	var_y += 0.1f;
+	Mueve(&mundo);
+
 	glutTimerFunc(25, OnTimer, 0);
 	glutPostRedisplay();
 
